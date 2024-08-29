@@ -12,5 +12,6 @@ function App() {
     </div>
   )
 }
+// https://storage.googleapis.com/tfds-data/visualization/fig/mnist-3.0.1.png
 
 export default App
