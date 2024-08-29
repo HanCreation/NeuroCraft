@@ -4,6 +4,8 @@ import torch.nn.functional as F
 import torchvision
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
+from flask import Flask, request, jsonify
+
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -11,7 +13,6 @@ transform = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize((0.5,), (0.5,))
 ])
-
 
 
 def dataset_loader(datas):
@@ -25,7 +26,8 @@ def dataset_loader(datas):
     
     
     return (torch.utils.data.DataLoader(dataset=train_dataset, batch_size=128, shuffle=True),
-            torch.utils.data.DataLoader(dataset=test_dataset, batch_size=128, shuffle=False)) , max(train_dataset.targets).item()+1, train_dataset[0][0].shape
+            torch.utils.data.DataLoader(dataset=test_dataset, batch_size=128, shuffle=False) , 
+            max(train_dataset.targets).item()+1, train_dataset[0][0].shape)
 
 
 class NN(nn.Module):
@@ -76,3 +78,61 @@ class NN(nn.Module):
         for layer in self.layers:
             x = layer(x)
         return x
+
+def run_train():
+    data= request.get_json()
+    dataset_name= data['dataset']
+    arch= data['arch']
+    iterations= data['iterations']
+    
+    
+    (train_loader, test_loader), num_classes, shape = dataset_loader(dataset_name)
+    
+    for sampleimg, samplelbl in train_loader:
+        break
+    B, A, T, C = sampleimg.shape
+    
+    
+    model = NN(input_size=(T*C), num_classes=num_classes, arch=arch)
+    model = model.to(device)
+    
+    
+    def calculate_accuracy(model, data_loader, device):
+        model.eval()  # Set the model to evaluation mode
+        correct = 0
+        total = 0
+        
+        with torch.no_grad():  # Disable gradient calculation
+            for images, labels in data_loader:
+                images = images.view(-1, T*C).to(device)  # Flatten the image
+                labels = labels.to(device)
+                outputs = model(images)
+                predicted = torch.argmax(outputs, 1)
+                total += labels.size(0)
+                correct += (predicted == labels).sum().item()
+        
+        accuracy = 100 * correct / total
+        return accuracy
+    
+    optim= torch.optim.Adam(model.parameters(), lr=0.001)
+    
+    for iter in range(iterations):
+        for i, (images, labels) in enumerate(train_loader):
+            images = images.view(-1, T*C).to(device) #Flatten the image
+            labels = labels.to(device)
+            optim.zero_grad()
+            outputs = model(images)
+            loss = F.cross_entropy(outputs, labels)
+            loss.backward()
+            optim.step()
+            # if (i+1) % 100 == 0:
+            #     print(f'Iteration: {iter+1}, Batch={i+1}, Loss: {loss.item()}')
+        if (iter)%5 ==0:
+            train_accuracy = calculate_accuracy(model, train_loader, device)
+            test_accuracy = calculate_accuracy(model, test_loader, device)
+            print(f'Iteration: {iter+1}, Train Accuracy: {train_accuracy}, Test Accuracy: {test_accuracy}')
+
+
+if __name__ == '__main__':
+    app = Flask(__name__)
+    app.run(port=5000)
