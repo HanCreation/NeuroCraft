@@ -1,36 +1,39 @@
-import React, { useState } from 'react'
-
-
-
+import React, { useState } from "react";
 
 const form: React.FC = () => {
-    return(
-        <div className="flex items-center justify-center h-screen">
-            <form className="p-8 bg-white shadow-lg">
-             <div className=''>
-             <fieldset>
-            <legend className="sr-only">Countries</legend>
-
-            <label htmlFor='username' className='block text-gray-700  text-center font-bold mb-2'>Dataset</label>
-            <div className="flex items-center justify-center mb-4">
-                <input id="country-option-1" type="radio" name="countries" value="USA" className="w-4 h-4 border-gray-300 focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-600 dark:focus:bg-blue-600 dark:bg-gray-700 dark:border-gray-600" checked></input>
-                <label id="country-option-1" className="block ms-2  text-sm font-medium text-1f1f1f">
-                MNIST
-                </label>
-            </div>
-            <div className="flex items-center justify-center">
-            <input id="country-option-1" type="radio" name="countries" value="USA" className="w-4 h-4 border-gray-300 focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-600 dark:focus:bg-blue-600 dark:bg-gray-700 dark:border-gray-600"></input>
-                <label id="country-option-1" className="block ms-2  text-sm font-medium text-1f1f1f">
-                Fashion-MNIST
-                </label>
-            </div>
-            </fieldset>
-               
-             </div>
-            </form>
-           
+  return (
+    <div className="flex h-screen items-center justify-center">
+      <form className="rounded-lg bg-white p-8 shadow-lg">
+        <div className="m-5 flex items-center justify-center">
+          <h1 className="text-2xl">Train Your Model Here</h1>
         </div>
-    )
-}
+        <div className="w-5000000 border-2 border-solid border-black"></div>
+        <div className="mt-4">
+          <label className="flex items-center justify-center text-xl">
+            Dataset
+          </label>
+        </div>
+
+        <div className="flex space-x-2 text-sm font-light text-black">
+          <div>
+            <label className="relative">
+              <input
+                className="flex h-9 w-10 appearance-none items-center justify-center rounded-sm bg-1f1f1f"
+                name="size"
+                type="radio"
+                value="xs"
+                checked
+              ></input>
+              <span className="absolute inset-0 flex items-center justify-center text-white">
+                XS
+              </span>
+            </label>
+            <div></div>
+          </div>
+        </div>
+      </form>
+    </div>
+  );
+};
 
 export default form;

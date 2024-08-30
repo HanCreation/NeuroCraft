@@ -6,7 +6,7 @@ import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 from flask import Flask, request, jsonify
 
-
+app = Flask(__name__)
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 transform = transforms.Compose([
@@ -79,6 +79,7 @@ class NN(nn.Module):
             x = layer(x)
         return x
 
+@app.route('/train', methods=['POST'])
 def run_train():
     data= request.get_json()
     dataset_name= data['dataset']
@@ -131,8 +132,10 @@ def run_train():
             train_accuracy = calculate_accuracy(model, train_loader, device)
             test_accuracy = calculate_accuracy(model, test_loader, device)
             print(f'Iteration: {iter+1}, Train Accuracy: {train_accuracy}, Test Accuracy: {test_accuracy}')
+            #Return to the client
+            return jsonify({'train_accuracy': train_accuracy, 'test_accuracy': test_accuracy})
+
 
 
 if __name__ == '__main__':
-    app = Flask(__name__)
     app.run(port=5000)
