@@ -18,7 +18,7 @@ const form: React.FC = () => {
           <div>
             <label className="relative">
               <input
-                className="flex h-9 w-10 appearance-none items-center justify-center rounded-sm bg-1f1f1f"
+                className="flex h-9 w-10 appearance-none items-center justify-center rounded-sm bg-[#1f1f1f]"
                 name="size"
                 type="radio"
                 value="xs"
@@ -28,7 +28,9 @@ const form: React.FC = () => {
                 XS
               </span>
             </label>
-            <div></div>
+            <div>
+              
+            </div>
           </div>
         </div>
       </form>
