@@ -8,7 +8,8 @@ function App() {
   return (
     <div className='bg-1f1f1f'>
       <Header/>
-      <Form/>
+      {/* <h1>golbok</h1> */}
+      {/* <Form/> */}
     </div>
   )
 }
