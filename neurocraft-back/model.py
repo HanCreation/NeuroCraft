@@ -5,8 +5,11 @@ import torchvision
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 from flask import Flask, request, jsonify
+from flask_cors import CORS
+
 
 app = Flask(__name__)
+CORS(app) 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 transform = transforms.Compose([
@@ -20,58 +23,47 @@ def dataset_loader(datas):
         'mnist': (datasets.MNIST(root='./data', train=True, download=True, transform=transform), datasets.MNIST(root='./data', train=False, download=True, transform=transform)),
         'fashion_mnist': (datasets.FashionMNIST(root='./data', train=True, download=True, transform=transform), datasets.FashionMNIST(root='./data', train=False, download=True, transform=transform)),
         'cifar10': (datasets.CIFAR10(root='./data', train=True, download=True, transform=transform), datasets.CIFAR10(root='./data', train=False, download=True, transform=transform)),
-        'cifar100': (datasets.CIFAR100(root='./data', train=True, download=True, transform=transform), datasets.CIFAR100(root='./data', train=False, download=True, transform=transform)),
     }[datas]
     
     
     
     return (torch.utils.data.DataLoader(dataset=train_dataset, batch_size=128, shuffle=True),
             torch.utils.data.DataLoader(dataset=test_dataset, batch_size=128, shuffle=False) , 
-            max(train_dataset.targets).item()+1, train_dataset[0][0].shape)
+            max(train_dataset.targets).item()+1)
 
 
 class NN(nn.Module):
     def __init__(self, input_size, num_classes, arch):
-        super().__init__()
-        self.device = device
-        layerss = []
-        sizes = []
-        for l, v in arch:
-            layerss.append(l)
-            sizes.append(v)
-        
-        self.layers = nn.ModuleList()
-        prev_size = input_size
-        
-        # Input layer
-        size = sizes[0]
-        self.layers.append(nn.Linear(in_features=prev_size, out_features=size).to(self.device))
-        
-        # Hidden layers
-        prev_size = size
-        for i in range(1, len(arch)):
-            size = sizes[i]
-            layer = layerss[i]
-            if layer == 'linear':
-                self.layers.append(nn.Linear(in_features=prev_size, out_features=size).to(self.device))
-            elif layer == 'relu':
-                self.layers.append(nn.ReLU().to(self.device))
-            elif layer == 'sigmoid':
-                self.layers.append(nn.Sigmoid().to(self.device))
-            elif layer == 'batchnorm1d':
-                self.layers.append(nn.BatchNorm1d(prev_size).to(self.device))
-            elif layer == 'dropout':
-                self.layers.append(nn.Dropout().to(self.device))
-            elif layer == 'flatten':
-                self.layers.append(nn.Flatten().to(self.device))
-            elif layer == 'softmax':
-                self.layers.append(nn.Softmax(dim=1).to(self.device))
-            if size is not None:
-                prev_size = size
-        
-        # Output layer
-        self.layers.append(nn.Linear(prev_size, num_classes).to(self.device))
-        self.layers.append(nn.Softmax(dim=1).to(self.device))
+            super().__init__()
+            self.device = device
+            self.layers = nn.ModuleList()
+            prev_size = input_size
+
+            for layer in arch:
+                layer_type = layer['type']
+                size = layer.get('size', None)
+                if layer_type == 'linear':
+                    if size is None or size == "":
+                        raise ValueError("Size must be specified for linear layers")
+                    self.layers.append(nn.Linear(in_features=prev_size, out_features=int(size)).to(self.device))
+                    prev_size = int(size)
+                elif layer_type == 'relu':
+                    self.layers.append(nn.ReLU().to(self.device))
+                elif layer_type == 'sigmoid':
+                    self.layers.append(nn.Sigmoid().to(self.device))
+                elif layer_type == 'batchnorm1d':
+                    self.layers.append(nn.BatchNorm1d(prev_size).to(self.device))
+                elif layer_type == 'dropout':
+                    p = float(size) if size else 0.5  # Default dropout probability to 0.5 if not specified
+                    self.layers.append(nn.Dropout(p=p).to(self.device))
+                elif layer_type == 'flatten':
+                    self.layers.append(nn.Flatten().to(self.device))
+                elif layer_type == 'softmax':
+                    self.layers.append(nn.Softmax(dim=1).to(self.device))
+
+            # Output layer
+            self.layers.append(nn.Linear(prev_size, num_classes).to(self.device))
+            self.layers.append(nn.Softmax(dim=1).to(self.device))
   
     def forward(self, x):
         x = x.to(self.device)
@@ -84,10 +76,10 @@ def run_train():
     data= request.get_json()
     dataset_name= data['dataset']
     arch= data['arch']
-    iterations= data['iterations']
+    iterations= data['epochs']
     
-    
-    (train_loader, test_loader), num_classes, shape = dataset_loader(dataset_name)
+    # print(iterations)
+    train_loader, test_loader, num_classes = dataset_loader(dataset_name)
     
     for sampleimg, samplelbl in train_loader:
         break
@@ -128,14 +120,17 @@ def run_train():
             optim.step()
             # if (i+1) % 100 == 0:
             #     print(f'Iteration: {iter+1}, Batch={i+1}, Loss: {loss.item()}')
+            # print(i, loss.item())
         if (iter)%5 ==0:
             train_accuracy = calculate_accuracy(model, train_loader, device)
             test_accuracy = calculate_accuracy(model, test_loader, device)
             print(f'Iteration: {iter+1}, Train Accuracy: {train_accuracy}, Test Accuracy: {test_accuracy}')
             #Return to the client
             return jsonify({'train_accuracy': train_accuracy, 'test_accuracy': test_accuracy})
-
-
+    print('Training completed')  
+    
+    
+    
 
 if __name__ == '__main__':
-    app.run(port=5000)
+    app.run(port=1000)
