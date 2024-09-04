@@ -31,7 +31,7 @@ def dataset_loader(datas):
     
     return (torch.utils.data.DataLoader(dataset=train_dataset, batch_size=128, shuffle=True),
             torch.utils.data.DataLoader(dataset=test_dataset, batch_size=128, shuffle=False) , 
-            max(train_dataset.targets).item()+1)
+            (max(train_dataset.targets).item()+1 if datas != 'cifar10' else max(train_dataset.targets)+1))
 
 
 class NN(nn.Module):
@@ -56,8 +56,8 @@ class NN(nn.Module):
                 elif layer_type == 'batchnorm1d':
                     self.layers.append(nn.BatchNorm1d(prev_size).to(self.device))
                 elif layer_type == 'dropout':
-                    p = float(size) if size else 0.5  # Default dropout probability to 0.5 if not specified
-                    self.layers.append(nn.Dropout(p=p).to(self.device))
+                    # p = float(size) if size else 0.5  # Default dropout probability to 0.5 if not specified
+                    self.layers.append(nn.Dropout(p=0.2).to(self.device))
                 elif layer_type == 'flatten':
                     self.layers.append(nn.Flatten().to(self.device))
                 elif layer_type == 'softmax':
@@ -88,7 +88,7 @@ def run_train():
     B, A, T, C = sampleimg.shape
     
     
-    model = NN(input_size=(T*C), num_classes=num_classes, arch=arch)
+    model = NN(input_size=(A*T*C), num_classes=num_classes, arch=arch)
     model = model.to(device)
     
     
@@ -99,7 +99,7 @@ def run_train():
         
         with torch.no_grad():  # Disable gradient calculation
             for images, labels in data_loader:
-                images = images.view(-1, T*C).to(device)  # Flatten the image
+                images = images.view(images.size(0), -1).to(device)  # Flatten the image
                 labels = labels.to(device)
                 outputs = model(images)
                 predicted = torch.argmax(outputs, 1)
@@ -113,15 +113,15 @@ def run_train():
     
     for iter in range(int(iterations)):
         for i, (images, labels) in enumerate(train_loader):
-            images = images.view(-1, T*C).to(device) #Flatten the image
+            images = images.view(images.size(0), -1).to(device) #Flatten the image
             labels = labels.to(device)
             optim.zero_grad()
             outputs = model(images)
             loss = F.cross_entropy(outputs, labels)
             loss.backward()
             optim.step()
-            if (i+1) % 100 == 0:
-                print(f'Iteration: {iter+1}, Batch={i+1}, Loss: {loss.item()}')
+            # if (i+1) % 100 == 0:
+            #     print(f'Iteration: {iter+1}, Batch={i+1}, Loss: {loss.item()}')
             # print(i, loss.item())
         if (iter)%5 ==0:
             train_accuracy = calculate_accuracy(model, train_loader, device)
@@ -132,7 +132,7 @@ def run_train():
     print('Training completed')
     train_accuracy = calculate_accuracy(model, train_loader, device)
     test_accuracy = calculate_accuracy(model, test_loader, device)
-    #Save the model with date and time included
+    print(f'Train Accuracy: {train_accuracy}, Test Accuracy: {test_accuracy}')
     
     curr_time= datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     if not os.path.exists('models'):
