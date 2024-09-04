@@ -6,6 +6,8 @@ import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import json
+import datetime, os
 
 
 app = Flask(__name__)
@@ -109,7 +111,7 @@ def run_train():
     
     optim= torch.optim.Adam(model.parameters(), lr=0.001)
     
-    for iter in range(iterations):
+    for iter in range(int(iterations)):
         for i, (images, labels) in enumerate(train_loader):
             images = images.view(-1, T*C).to(device) #Flatten the image
             labels = labels.to(device)
@@ -118,17 +120,27 @@ def run_train():
             loss = F.cross_entropy(outputs, labels)
             loss.backward()
             optim.step()
-            # if (i+1) % 100 == 0:
-            #     print(f'Iteration: {iter+1}, Batch={i+1}, Loss: {loss.item()}')
+            if (i+1) % 100 == 0:
+                print(f'Iteration: {iter+1}, Batch={i+1}, Loss: {loss.item()}')
             # print(i, loss.item())
         if (iter)%5 ==0:
             train_accuracy = calculate_accuracy(model, train_loader, device)
             test_accuracy = calculate_accuracy(model, test_loader, device)
             print(f'Iteration: {iter+1}, Train Accuracy: {train_accuracy}, Test Accuracy: {test_accuracy}')
             #Return to the client
-            return jsonify({'train_accuracy': train_accuracy, 'test_accuracy': test_accuracy})
-    print('Training completed')  
     
+    print('Training completed')
+    train_accuracy = calculate_accuracy(model, train_loader, device)
+    test_accuracy = calculate_accuracy(model, test_loader, device)
+    #Save the model with date and time included
+    
+    curr_time= datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    if not os.path.exists('models'):
+        os.makedirs('models', exist_ok=True)
+        
+    
+    torch.save(model, f'models/{dataset_name}_model{curr_time}.pth')
+    return jsonify({'train_accuracy': train_accuracy, 'test_accuracy': test_accuracy})
     
     
 
