@@ -104,7 +104,7 @@ const Form: React.FC = () => {
                                 className="w-1/2 p-2 border border-gray-300 rounded mr-2"
                             >
                                 <option value="">Select a layer type</option>
-                                <option value="linear">Linear</option>
+                                <option value="linear">Linear / Dense</option>
                                 <option value="relu">ReLU</option>
                                 <option value="sigmoid">Sigmoid</option>
                                 <option value="batchnorm1d">Batch Normalization</option>

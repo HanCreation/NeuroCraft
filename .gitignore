@@ -24,3 +24,4 @@ dist-ssr
 *.sw?
 /neurocraft-back/venv
 /neurocraft-back/data
+/neurocraft-back/models
