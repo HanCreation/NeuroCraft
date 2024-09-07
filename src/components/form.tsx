@@ -24,7 +24,7 @@ const Form: React.FC = () => {
   //komponen fungsional adalah fungsi yang return something ke front endnya
   const [formData, setFormData] = useState<FormData>({
     dataset: "",
-    arch: [],
+    arch: [{ type: "", size: "" }],
     epochs: 0,
   });
 
@@ -96,6 +96,33 @@ const Form: React.FC = () => {
     });
   };
 
+  // Same as like:
+  // const handleLayerChange = (index: number, key: string, value: string) => { ...the syntax...}
+  // key -> using keyof which either type or size according to the interface itself (formData arch [0] aka the left part)
+  // Specifically:
+  // FormData['arch'][0] is equivalent to { type: string; size: string }.
+  // It’s like saying, "Give me the type of the first element in this array," which tells TypeScript what each element (object) in the arch array looks like.
+  function handleSize(index: number, key: keyof FormData['arch'][0], value: string){
+    //Copy of arch
+    const newArch = [...formData.arch]
+    //set newArch with the new value
+    newArch[index][key] = value
+    //Create new formData with new value set
+    setFormData({...formData, arch:newArch}) 
+  }
+
+
+  function removeLayer(index:number){
+    // Create a new array 'newArch' by filtering out the element at the specified index from the 'arch' array (i!=index)
+    const newArch=formData.arch.filter((_,i)=> i!==index)
+    setFormData({...formData, arch:newArch}) 
+  }
+
+  function addLayer(){
+    //Memperbaharui state formdata dengan cara membuat salinan form data kemudian tambahin arch kosong yg bakal diedit nanti (Alias kita nambahin archnya aja)
+    setFormData({...formData, arch: [...formData.arch,{type:'',size:''}]})
+  }
+
   return (
     //Div is centered flex+justify-center+items-center+min-h-screen
     <div className="flex min-h-screen items-center justify-center">
@@ -107,8 +134,8 @@ const Form: React.FC = () => {
           Neural Network Configuration
         </h1>
 
-        <div className="m-7">
-          <label className="flex justify-center text-center text-2xl">Dataset</label>
+        <div className="m-7 mb-20">
+          <label className="flex justify-center text-center text-xl">Dataset</label>
           <div className="mt-4 flex space-x-4 justify-center"> 
             {/* // Render a div element with the specified class names and flexbox properties */}
             {datasets.map((data) => ( // Iterate over the 'datasets' array and render the following elements for each object in the array
@@ -120,15 +147,16 @@ const Form: React.FC = () => {
                   type="radio"
                   value={data.value}
                   checked={formData.dataset === data.value}
+                  // onChange secara real time dipanggil saat elemen input berubah, kemudian dilempar ke fungsi setFormData yang menerima paremeter e (sebuah object event). terus dia bakal buat formData baru dengan dataset udah di update jadi e.target.value (target, elemen input yg memicu event, valuenya itu value dari elemennya)
                   onChange={(e) => setFormData({...formData, dataset: e.target.value})}
                 /> 
                 {/* // Render an input element with the specified attributes and event handler */}
                 <img
                   src={data.imageSrc}
                   alt={data.label}
-                  className={`h-20 w-20 rounded ${formData.dataset === data.value ? "border-4 border-blue-500" : ""}`} // Render an img element with the specified attributes and conditional class name
+                  className={`h-30 w-30 rounded ${formData.dataset === data.value ? "border-4 border-blue-500" : ""}`} // Render an img element with the specified attributes and conditional class name
                 />
-                <span className="absolute inset-0 flex items-center justify-center font-bold text-1f1f1f mt-24 text-center"> 
+                <span className="inset-0 flex items-center justify-center font-bold text-1f1f1f text-center"> 
                   {/* // Render a span element with the specified class names and text content */}
                   {data.label}
                 </span>
@@ -137,12 +165,14 @@ const Form: React.FC = () => {
           </div>
         </div>
         <div className="mb-4">
-          <label htmlFor="arch" className="mb-2 flex items-center">
+          <label htmlFor="arch" className="mb-2 flex items-center text-xl">
             Architechture
           </label>
           {/* Iterate over formData arch, need 2 parameter since to keep track of the structure of the layer */}
+          {/* <h1>luar</h1> */}
           {formData.arch.map((layer, idx) => (
             <div key={idx} className="mb-2 flex items-center">
+              {/* // Render a select element with the specified attributes and event handler */}
               <select
                 name={`arch-${idx}-type`}
                 value={layer.type}
@@ -150,9 +180,42 @@ const Form: React.FC = () => {
                 className="w-full rounded border border-gray-300 p-2"
               >
               
+              {/* // Render options element with the specified value and text content */}
+              <option value="">Select Layer Type</option> 
+                {/* // Render an option element with the specified value and text content */}
+                <option value="linear">Linear</option>                
+                <option value="relu">ReLU</option> 
+                <option value="sigmoid">Sigmoid</option> 
+                <option value="batchnorm1d">BatchNorm1d</option> 
+                <option value="dropout">Dropout 20%</option> 
+                {/* // Render an option element with the specified value and text content */}
+                <option value="flatten">Flatten</option> 
+                {/* // Render an option element with the specified value and text content */}
+                {/* <option value="softmax">Softmax</option> */} 
+                {/* // Render a commented out option element */}
               </select>
+              {/* if layer is linear berarti kita munculin input value.size */}
+              {layer.type === 'linear' &&(
+                <input
+                  type="number"
+                  placeholder="Size"
+                  className="w-20 rounded-sm bg-[#f0f0f0] p-2"
+                  onChange={(e) =>
+                    handleSize(idx, "size", e.target.value)
+                  }
+                  value={layer.size}
+                />
+              )}
+              <button type="button" className="text-red-500"
+              onClick={()=>removeLayer(idx)}
+              >
+                Remove Layer
+              </button>
             </div>
           ))}
+          <button className="mt-2 w-full rounded-sm bg-blue-500 p-2 text-white" onClick={addLayer}>
+            Add Layer
+          </button>
         </div>
       </form>
     </div>
