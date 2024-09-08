@@ -25,7 +25,7 @@ const Form: React.FC = () => {
   //komponen fungsional adalah fungsi yang return something ke front endnya
   const [formData, setFormData] = useState<FormData>({
     dataset: "mnist",
-    arch: [{ type: "linear", size: "" }],
+    arch: [{ type: "", size: "" }],
     epochs: 0,
   });
 
@@ -145,7 +145,7 @@ const Form: React.FC = () => {
 
   return (
     //Div is centered flex+justify-center+items-center+min-h-screen
-    <div className="m-8 flex min-h-screen items-center justify-center">
+    <div className="flex min-h-screen items-center justify-center">
       <form
         className="w-full max-w-xl rounded-lg bg-white p-8 shadow-md"
         onSubmit={handleSubmit}
