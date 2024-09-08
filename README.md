@@ -1,4 +1,4 @@
-# NeuroCraft
+![image](https://github.com/user-attachments/assets/9467a014-1d61-4c63-a35d-2597b9b47b3a)![image](https://github.com/user-attachments/assets/c7b74d75-ff9f-4ad2-a605-ea6c72d8aadb)# NeuroCraft
 NeuroCraft is a web application that allows users to craft their own neural networks without writing any code. This project includes both a frontend built with React and a backend built with Python & Pytorch.
 
 ## Usage
