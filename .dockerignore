@@ -1,0 +1,8 @@
+node_modules
+dist
+.vscode
+.git
+neurocraft-back/venv
+neurocraft-back/data
+neurocraft-back/models
+neurocraft-back/__pycache__

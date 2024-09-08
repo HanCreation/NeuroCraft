@@ -1,3 +1,8 @@
 body {
     background-color: #1f1f1f;
+    background-image: url('https://private-user-images.githubusercontent.com/17227959/365426482-29b854ef-11a2-4c06-9991-d615abe849e7.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MjU3ODY5NDEsIm5iZiI6MTcyNTc4NjY0MSwicGF0aCI6Ii8xNzIyNzk1OS8zNjU0MjY0ODItMjliODU0ZWYtMTFhMi00YzA2LTk5OTEtZDYxNWFiZTg0OWU3LnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNDA5MDglMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjQwOTA4VDA5MTA0MVomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPWM5MWRjYTU0YTJmZDBkNzc2YWM0ZTgxMDU4YzM5YWU2NGVjZGFlOTc5YTE2OWFjMWZkODFhZDExMDgxNGViZWMmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0JmFjdG9yX2lkPTAma2V5X2lkPTAmcmVwb19pZD0wIn0.NfVROgVf9BGepVoYW9GNdUuWteqLhJGK6vIRqJnabt8');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    background-blend-mode: overlay;
 }

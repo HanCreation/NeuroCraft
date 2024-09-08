@@ -24,8 +24,8 @@ const Form: React.FC = () => {
   //useState mengelola state di dalam FormData -> Generic Type
   //komponen fungsional adalah fungsi yang return something ke front endnya
   const [formData, setFormData] = useState<FormData>({
-    dataset: "",
-    arch: [{ type: "", size: "" }],
+    dataset: "mnist",
+    arch: [{ type: "linear", size: "" }],
     epochs: 0,
   });
 
@@ -52,15 +52,13 @@ const Form: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [isButtonClicked, setIsButtonClicked] = useState<boolean>(false);
 
-
-
   //React.FormEvent type event buat menangani form, input, textarea, select
   const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
     //Enable loading state
     setLoading(true);
     setIsButtonClicked(true);
 
-    event.preventDefault();
     //Call the API
     fetch("http://127.0.0.1:1000/train", {
       method: "POST", //Method call
@@ -90,7 +88,6 @@ const Form: React.FC = () => {
         setIsButtonClicked(false);
       });
   };
-
 
   const handleArchChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -148,12 +145,12 @@ const Form: React.FC = () => {
 
   return (
     //Div is centered flex+justify-center+items-center+min-h-screen
-    <div className="flex min-h-screen items-center justify-center">
+    <div className="m-8 flex min-h-screen items-center justify-center">
       <form
         className="w-full max-w-xl rounded-lg bg-white p-8 shadow-md"
         onSubmit={handleSubmit}
       >
-        <h1 className="mb-6 text-center text-4xl font-bold">
+        <h1 className="mb-6 text-center text-3xl font-bold">
           Neural Network Configuration
         </h1>
 
@@ -197,55 +194,58 @@ const Form: React.FC = () => {
         </div>
         <div className="mb-4">
           <label htmlFor="arch" className="mb-2 flex items-center text-xl">
-            Architechture
+            Neural Network Architechture
           </label>
           {/* Iterate over formData arch, need 2 parameter since to keep track of the structure of the layer */}
           {/* <h1>luar</h1> */}
           {formData.arch.map((layer, idx) => (
             <div key={idx} className="mb-2 flex items-center">
               {/* // Render a select element with the specified attributes and event handler */}
-              <select
-                name={`arch-${idx}-type`}
-                value={layer.type}
-                onChange={handleArchChange}
-                className="w-full rounded border border-gray-300 p-2"
-              >
-                {/* // Render options element with the specified value and text content */}
-                <option value="">Select Layer Type</option>
-                {/* // Render an option element with the specified value and text content */}
-                <option value="linear">Linear</option>
-                <option value="relu">ReLU</option>
-                <option value="sigmoid">Sigmoid</option>
-                <option value="batchnorm1d">BatchNorm1d</option>
-                <option value="dropout">Dropout 20%</option>
-                {/* // Render an option element with the specified value and text content */}
-                <option value="flatten">Flatten</option>
-                {/* // Render an option element with the specified value and text content */}
-                {/* <option value="softmax">Softmax</option> */}
-                {/* // Render a commented out option element */}
-              </select>
-              {/* if layer is linear berarti kita munculin input value.size */}
-              {layer.type === "linear" && (
-                <input
-                  type="number"
-                  placeholder="Size"
-                  className="w-20 rounded-sm bg-[#f0f0f0] p-2"
-                  onChange={(e) => handleSize(idx, "size", e.target.value)}
-                  value={layer.size}
-                />
-              )}
-              <button
-                type="button"
-                className="text-red-500"
-                onClick={() => removeLayer(idx)}
-              >
-                Remove Layer
-              </button>
+              <div className="flex w-full items-center">
+                <select
+                  name={`arch-${idx}-type`}
+                  value={layer.type}
+                  onChange={handleArchChange}
+                  className="h-10 flex-grow rounded border border-gray-300 p-2"
+                >
+                  {/* // Render options element with the specified value and text content */}
+                  <option value="">Select Layer Type</option>
+                  {/* // Render an option element with the specified value and text content */}
+                  <option value="linear">Linear</option>
+                  <option value="relu">ReLU</option>
+                  <option value="sigmoid">Sigmoid</option>
+                  <option value="batchnorm1d">BatchNorm1d</option>
+                  <option value="dropout">Dropout 20%</option>
+                  {/* // Render an option element with the specified value and text content */}
+                  {/* <option value="flatten">Flatten</option> */}
+                  {/* // Render an option element with the specified value and text content */}
+                  {/* <option value="softmax">Softmax</option> */}
+                  {/* // Render a commented out option element */}
+                </select>
+                {/* if layer is linear berarti kita munculin input value.size */}
+                {layer.type === "linear" && (
+                  <input
+                    type="number"
+                    placeholder="Size"
+                    className="w-20 rounded-sm bg-[#f0f0f0] p-2"
+                    onChange={(e) => handleSize(idx, "size", e.target.value)}
+                    value={layer.size}
+                  />
+                )}
+                <button
+                  type="button"
+                  className="ml-2 h-10 text-red-500"
+                  onClick={() => removeLayer(idx)}
+                >
+                  Remove Layer
+                </button>
+              </div>
             </div>
           ))}
           <button
             className="mt-2 w-full rounded-sm bg-blue-500 p-2 text-white"
             onClick={addLayer}
+            type="button"
           >
             Add Layer
           </button>
@@ -266,30 +266,34 @@ const Form: React.FC = () => {
         </div>
         <div className="flex justify-center">
           <button
-          //If button sedang di click, maka warnanya gray dan tidak bisa dipencet
-          // hover: untuk efek hover
-            className={`relative ounded-sm p-2 ${isButtonClicked ? "bg-gray-500 text-gray-300" : "bg-green-500 text-white hover:bg-green-600"}`}
+            //If button sedang di click, maka warnanya gray dan tidak bisa dipencet
+            // hover: untuk efek hover
+            className={`relative rounded-sm p-2 ${isButtonClicked ? "bg-gray-500 text-gray-300" : "bg-green-500 text-white hover:bg-green-600"}`}
             type="submit"
             disabled={isButtonClicked}
-            
           >
-            Train Your Craft
-            <div className="absolute flex justify-center items-center inset-0">
-            {loading && (
-              <ClipLoader color="#fff" size={15} loading={loading} />
-            )}
+            Train Your Crafted Neurons
+            <div className="absolute inset-0 flex items-center justify-center">
+              {loading && (
+                <ClipLoader color="#fff" size={15} loading={loading} />
+              )}
             </div>
-            
           </button>
-          {/* Render train and test accuracy when it is done */}
-          {trainAccuracy !== null && testAccuracy !== null && (
-            <div className="mt-4">
-              <h3 className="mb-2 text-lg font-bold">{`Training Results on ${formData.dataset} dataset`}</h3>
-              <p>Train Accuracy: {trainAccuracy}</p>
-              <p>Test Accuracy: {testAccuracy}</p>
-            </div>
-          )}
         </div>
+
+        {/* Render train and test accuracy when it is done */}
+        {trainAccuracy !== null && testAccuracy !== null && (
+          <div className="mt-4">
+            <h3 className="mb-2 text-lg font-bold">
+              {/* Ternary Operation if else of the dataset */}
+              {formData.dataset === "mnist"
+                ? "Training Results on MNIST Digit dataset"
+                : "Training Results on Fashion MNIST dataset"}
+            </h3>
+            <p>Train Accuracy: {trainAccuracy}</p>
+            <p>Test Accuracy: {testAccuracy}</p>
+          </div>
+        )}
       </form>
     </div>
   );
